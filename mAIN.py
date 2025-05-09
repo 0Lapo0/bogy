@@ -428,17 +428,20 @@ class field:
 
     def rep(self, l):
         for s in l:
-            if py.Rect.colliderect(s[5], self.rect):
-                coll_point = py.sprite.collide_mask(self, k)
-                s[0] -= s[4][0]
-                s[1] -= s[4][1]
-                s[5] = Rect(s[0], s[1], 20, 20)
-                s[8] = True
-                print("coll: ", coll_point)
-                if s[5].left > self.rect.right - 1 or s[5].right < self.rect.left + 1:
-                    s[6] *= -1
-                else:
-                    s[7] *= -1
+            if len(s[4]) == 2:
+                if py.Rect.colliderect(s[5], self.rect):
+                    coll_point = py.sprite.collide_mask(self, k)
+                    s[0] -= s[4][0]
+                    s[1] -= s[4][1]
+                    s[5] = Rect(s[0], s[1], 20, 20)
+                    s[8] = True
+                    print("coll: ", coll_point)
+                    if s[5].left > self.rect.right - 1 or s[5].right < self.rect.left + 1:
+                        s[6] *= -1
+                    else:
+                        s[7] *= -1
+            else:
+                return
 
 
 
@@ -560,11 +563,36 @@ class shot:
                     pass
             else:
                 self.shots.remove(s)
-
         text = f"shots: {len(self.shots)}"
         text_m = py.font.SysFont(None, 30)
         tex = text_m.render(text, True, (255, 0, 0))
         screen.blit(tex, (100, 150))
+class storage:
+    def __init__(self, x, y, width, colour):
+        self.pos = [x, y]
+        self.width = width
+        self.colour = colour
+        self.heigth = 0
+    def sto(self, en):
+        if self.heigth > en:
+            if not self.colour[0] == 0:
+                self.colour[0] -= 0.25
+            if not self.colour[1] == 255:
+                self.colour[1] += 0.25
+        if self.heigth < en:
+            if not self.colour[0] == 255:
+                self.colour[0] += 0.25
+            if not self.colour[1] == 0:
+                self.colour[1] -= 0.25
+        self.heigth = en
+        
+        self.pos[1] = screen.get_height() - en
+        self.rect = Rect(self.pos[0], self.pos[1], self.width, self.heigth)
+        print(self.colour)
+        py.draw.rect(screen, self.colour, self.rect)
+
+
+
 
 
 
@@ -590,6 +618,7 @@ f3 = field((255, 0, 255), screen.get_width() / 2 + 500, screen.get_height() / 2 
 f4 = field((255, 0, 255), screen.get_width() / 2 + 1000, screen.get_height() / 2 + 1000, t, 200, 200, 0, path_box)
 f5 = field((255, 0, 255), screen.get_width() / 2, screen.get_height() / 3, t, 200, 200, 0, path_box)
 f6 = field((255, 0, 255), screen.get_width() / 3, screen.get_height() / 3, t, 200, 200, 0, path_box)
+sto = storage(screen.get_width() - 10, screen.get_height(), 30, [0, 255, 0])
 en = 0
 
 while game:
@@ -627,10 +656,13 @@ while game:
     if key[py.K_e] and not key[py.K_f]:
         if f1.coll(s1):
             f1.push(f, t, 1, stop, k.shots, en)
+            en = f1.en
         if f2.coll(s1):
             f2.push(f, t, -1, stop, k.shots, en)
+            en = f2.en
         if f5.coll(s1):
             f5.push(f, t, -1, stop, k.shots, en)
+            en = f5.en
     s1.move(s)
     s1.draw()
     tick += 1
@@ -659,7 +691,7 @@ while game:
 
     f6.des(k.shots, en)
     en = f6.en
-
+    sto.sto(en)
     if s1.loose(k.shots):
         game = False
 
