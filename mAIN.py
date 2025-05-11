@@ -15,10 +15,10 @@ screen_col = (0, 0, 0)
 screen = py.display.set_mode((0, 0), py.FULLSCREEN)
 tick = 0
 clock = py.time.Clock()
-path_st = "/home/weinmann/PycharmProjects/Bogi1/st.png"
-path_ja = "/home/weinmann/PycharmProjects/Bogi1/ja.png"
-path_bull = "/home/weinmann/PycharmProjects/Bogi1/footagecrate-looping-blaster-bolt-triple-prev-full.png"
-path_box = "/home/weinmann/PycharmProjects/Bogi1/box.png"
+path_st = r"C:\Users\hukel\OneDrive\Desktop\python\Bogi\st.png"
+path_ja = r"C:\Users\hukel\OneDrive\Desktop\python\Bogi\ja.png"
+path_bull = r"C:\Users\hukel\OneDrive\Desktop\python\Bogi\footagecrate-looping-blaster-bolt-triple-prev-full.png"
+path_box = r"C:\Users\hukel\OneDrive\Desktop\python\Bogi\box.png"
 l = True
 f = []
 ma = []
@@ -41,6 +41,9 @@ def sprite_rot(self,img, angle):
     self.st_im_rot = py.transform.rotate(self.img, angle)
     self.st_rect_rot = self.st_im_rot.get_rect(center=self.st_rect.center)
     screen.blit(self.st_im_rot, self.st_rect_rot)
+
+
+        
 
 
 def angle(v_start, v_ziel):
@@ -436,10 +439,13 @@ class field:
                     s[5] = Rect(s[0], s[1], 20, 20)
                     s[8] = True
                     print("coll: ", coll_point)
+
                     if s[5].left > self.rect.right - 1 or s[5].right < self.rect.left + 1:
-                        s[6] *= -1
+                        a = 180 - s[2] * 2
+                        s[2] += 180 + a
                     else:
-                        s[7] *= -1
+                        a = s[2] * 2
+                        s[2] += 180 - a
             else:
                 return
 
@@ -533,32 +539,47 @@ class shot:
                     s[1] += y
 
                     rect = Rect(s[0], s[1], 20, 20)
-                    shot = [s[0], s[1], s[2], 0.112, [], rect, 1, 1, False]
+                    shot = [s[0], s[1], s[2], 0.112, [], rect, 1, 1, False, None, None, None]
                     self.shots.append(shot)
         for s in self.shots:
             if -500 < s[0] < screen.get_width() + 500 and -500 < s[1] < screen.get_height() + 500:
                 if not math.isnan(s[2]):
-                    print(f"s2: {s[2]}")
-                    x = math.cos((-s[2] + 90) * math.pi / 180) * s[6]
-                    y = math.sin((-s[2] + 90) * math.pi / 180) * s[7]
-                    print(x, y)
-                    n = math.sqrt(math.pow(x, 2) + math.pow(y, 2))
+                    if s[9] == s[2]:
 
-                    x = x / n * radius
-                    y = y / n * radius
+                        s[0] += s[4][0]
+                        s[1] += s[4][1]        
 
-                    s[4] = [x, y]
+                        s[5] = Rect(s[0], s[1], 20, 20)           
 
-                    deg = angle(np.array([s[0], s[1]]), np.array([s[0] + x, s[1] + y]))
-                    print(s[4])
-                    s[0] += x
-                    s[1] += y
-                    s[5] = Rect(s[0], s[1], 20, 20)
-                    self.x = s[0]
-                    self.y = s[1]
+                        self.x = s[0]
+                        self.y = s[1]
 
-                    sprite_rot(self, path_bull, deg + 270)
-                    print(s[8])
+                        sprite_rot(self, path_bull, s[10] + 270)
+                        print(s[8])
+                    else:
+                        s[9] = s[2]
+                        print(f"s2: {s[2]}")
+                        x = math.cos((-s[2] + 90) * math.pi / 180)
+                        y = math.sin((-s[2] + 90) * math.pi / 180)
+                        print(x, y)
+                        n = math.sqrt(math.pow(x, 2) + math.pow(y, 2))
+
+                        x = x / n * radius
+                        y = y / n * radius
+
+                        s[4] = [x, y]
+
+                        s[10] = angle(np.array([s[0], s[1]]), np.array([s[0] + x, s[1] + y]))
+                        print(s[4])
+                        s[0] += x
+                        s[1] += y
+                        s[5] = Rect(s[0], s[1], 20, 20)
+                        self.x = s[0]
+                        self.y = s[1]
+
+                        sprite_rot(self, path_bull, s[10] + 270)
+                        
+                        print(s[8])
                 elif math.isnan(s[2]):
                     pass
             else:
@@ -590,7 +611,6 @@ class storage:
         self.rect = Rect(self.pos[0], self.pos[1], self.width, self.heigth)
         print(self.colour)
         py.draw.rect(screen, self.colour, self.rect)
-
 
 
 
